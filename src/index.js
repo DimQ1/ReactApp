@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 
-let inputArray = [
+const inputArray = [
     { category: "Sporting Goods", price: "$49.99", stocked: true, name: "Football" },
     { category: "Sporting Goods", price: "$9.99", stocked: true, name: "Baseball" },
     { category: "Sporting Goods", price: "$29.99", stocked: false, name: "Basketball" },
@@ -36,11 +36,11 @@ class FilterableProductTable extends React.Component {
                     onInstokChange={this.handlerInStok}
                     onFilterChange={this.handlerFilter}
                 />
-                <ProductTable
+                <ProductView
                     products={this.props.products}
-                    inStockOnly={this.state.inStockOnly} 
+                    inStockOnly={this.state.inStockOnly}
                     filter={this.state.filter}
-                    />
+                />
             </div>
         );
     }
@@ -60,7 +60,6 @@ class SarchBar extends React.Component {
     handleFilter(e) {
         this.props.onFilterChange(e.target.value);
     }
-
 
     render() {
         return (
@@ -87,32 +86,42 @@ class SarchBar extends React.Component {
     }
 }
 
+class ProductView extends React.Component {
+    GetData() {
+        let isInStock = this.props.inStockOnly;
+        let filter = this.props.filter;
+
+        const filteredItems = this.props.products.filter(
+            product => (isInStock ? product.stocked === isInStock : true) && (!filter || product.name.includes(filter, 0))
+        );
+        const returnArr = filteredItems.reduce((newArray, item) => {
+            newArray[item.category] ?
+                newArray[item.category].push(item) :
+                newArray[item.category] = [item];
+            return newArray;
+        }, {});
+
+        return returnArr;
+    }
+
+    render() {
+        return (
+            <ProductTable rowsData={this.GetData()} />
+        );
+    }
+}
 
 class ProductTable extends React.Component {
     render() {
         const rows = [];
-        let lastCategory = null;
-        let isInStock = this.props.inStockOnly;
-        let filter = this.props.filter;
+        const rowsData = this.props.rowsData;
 
-        this.props.products.filter(product => product.stocked === isInStock && (!filter || product.name.includes(filter, 0))).forEach((product) => {
-            if (product.category !== lastCategory) {
-                rows.push(
-                    <ProductCategoryRow
-                        category={product.category}
-                        key={product.category} />
-                );
-            }
-            rows.push(
-                <ProductRow
-                    product={product}
-                    key={product.name} />
-            );
-            lastCategory = product.category;
-        });
+        for (const category in rowsData) {
+            rows.push(<ProductCategoryRow category={category} key={category} />);
+            rowsData[category].forEach(row => rows.push(<ProductRow product={row} key={row.name} />));
+        }
 
         return (
-
             <table>
                 <thead>
                     <tr>
@@ -145,7 +154,7 @@ class ProductRow extends React.Component {
     render() {
         const product = this.props.product;
         const name = product.stocked ? product.name :
-            <span color='red'>{product.name}</span>
+            <span className='red'>{product.name}</span>
         return (
             <tr>
                 <td>{name}</td>
