@@ -15,15 +15,13 @@ class FilterableProductTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = { filter: '', inStockOnly: false };
-        this.handlerInStok = this.handlerInStok.bind(this);
-        this.handlerFilter = this.handlerFilter.bind(this);
     }
 
-    handlerInStok(inStockOnly) {
+    handlerInStok = (inStockOnly)=> {
         this.setState({ inStockOnly })
     }
 
-    handlerFilter(filter) {
+    handlerFilter = (filter) => {
         this.setState({ filter });
     }
 
@@ -48,16 +46,11 @@ class FilterableProductTable extends React.Component {
 }
 
 class SarchBar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleInStock = this.handleInStock.bind(this);
-        this.handleFilter = this.handleFilter.bind(this);
-    }
-    handleInStock(e) {
-        this.props.onInstokChange(e.target.checked);
+    handleInStock = (event) => {
+        this.props.onInstokChange(event.target.checked);
     }
 
-    handleFilter(e) {
+    handleFilter = (e) => {
         this.props.onFilterChange(e.target.value);
     }
 
@@ -80,7 +73,6 @@ class SarchBar extends React.Component {
                     />
                     <label htmlFor="inStockOnly">Only show products in stock</label>
                 </div>
-
             </div>
         );
     }
@@ -94,14 +86,14 @@ class ProductView extends React.Component {
         const filteredItems = this.props.products.filter(
             product => (isInStock ? product.stocked === isInStock : true) && (!filter || product.name.includes(filter, 0))
         );
-        const returnArr = filteredItems.reduce((newArray, item) => {
+        const formattedData = filteredItems.reduce((newArray, item) => {
             newArray[item.category] ?
                 newArray[item.category].push(item) :
                 newArray[item.category] = [item];
             return newArray;
         }, {});
 
-        return returnArr;
+        return formattedData;
     }
 
     render() {
